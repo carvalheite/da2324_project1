@@ -5,6 +5,7 @@
 #include "Manager.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 
 bool Manager::loadSmallReservoir() {
@@ -38,6 +39,10 @@ Manager::Manager() {
     loadSmallReservoir();
     loadSmallStations();
     loadSmallCities();
+
+    loadLargeReservoir();
+    loadLargeStations();
+    loadLargeCities();
 }
 
 bool Manager::loadSmallStations() {
@@ -90,6 +95,99 @@ bool Manager::loadSmallCities() {
         if(code=="")continue;
 
         smallGraph.addCity(stoi(id), code,stod(demand),city,stoi(population));
+    }
+    cities.close();
+    return false;
+}
+
+bool Manager::loadLargeReservoir() {
+    std::ifstream resevoirs;
+    string str;
+    resevoirs.open("../large_dataset/Reservoir.csv");
+    if (resevoirs.is_open()) {
+        getline(resevoirs,str);
+
+    } else {
+        cout << "Failed to open reservoirs\n";
+        return true;
+    }
+    while(getline(resevoirs, str)) {
+        str.erase(std::remove(str.begin(), str.end(), '\r' ), str.end());
+        str.erase(std::remove(str.begin(), str.end(), '\n' ), str.end());
+
+        string name, id, municipality, code, maxDelivery;
+
+        std::stringstream ss(str);
+
+        getline(ss, name,',');
+        if(name=="")continue;
+        getline(ss, municipality,',');
+        getline(ss, id,',');
+        getline(ss, code,',');
+        getline(ss, maxDelivery,',');
+        largeGraph.addReservoir(stoi(id), code, stoi(maxDelivery), name, municipality);
+    }
+    resevoirs.close();
+    return false;
+}
+
+bool Manager::loadLargeStations() {
+    std::ifstream stations;
+    string str;
+    stations.open("../large_dataset/Stations.csv");
+    if (stations.is_open()) {
+        getline(stations,str);
+    } else {
+        cout << "Failed to open stations\n";
+        return true;
+    }
+    while(getline(stations, str)) {
+        str.erase(std::remove(str.begin(), str.end(), '\r' ), str.end());
+        str.erase(std::remove(str.begin(), str.end(), '\n' ), str.end());
+
+        string id, code;
+
+        std::stringstream ss(str);
+
+        getline(ss, id,',');
+        getline(ss, code,',');
+        if(code=="")continue;
+
+
+        largeGraph.addPumpingStation(stoi(id), code);
+    }
+    stations.close();
+    return false;
+}
+
+bool Manager::loadLargeCities() {
+    std::ifstream cities;
+    string str;
+
+    cities.open("../large_dataset/Cities.csv");
+    if (cities.is_open()) {
+        getline(cities,str);
+    } else {
+        cout << "Failed to open cities\n";
+        return true;
+    }
+    while(getline(cities, str)) {
+        str.erase(std::remove(str.begin(), str.end(), '\r' ), str.end());
+        str.erase(std::remove(str.begin(), str.end(), '\n' ), str.end());
+
+        string id, code, demand, population, city;
+
+        stringstream ss(str);
+
+        getline(ss, city,',');
+        getline(ss, id,',');
+        getline(ss, code,',');
+        getline(ss, demand,',');
+        getline(ss, population,',');
+
+        if(code=="")continue;
+
+        largeGraph.addCity(stoi(id), code,stod(demand),city,stoi(population));
     }
     cities.close();
     return false;

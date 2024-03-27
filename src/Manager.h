@@ -17,6 +17,7 @@ private:
     bool loadSmallReservoir();
     bool loadSmallStations();
     bool loadSmallCities();
+    bool loadSmallPipes();
 };
 
 

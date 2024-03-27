@@ -6,7 +6,7 @@ class Vertex;
 
 class Pipe {
 public:
-    Pipe(Vertex *orig, Vertex *dest, double c, int type): dest(dest),capacity(c),type(type) {}
+    Pipe(Vertex *orig, Vertex *dest, double c, int type);
 
     Vertex * getDest() const;
     double getcapacity() const;
@@ -18,19 +18,20 @@ public:
     void setSelected(bool selected);
     void setReverse(Pipe *reverse);
     void setFlow(double flow);
+    Pipe* getReverse();
+
 protected:
+    Vertex* orig;
     Vertex * dest; // destination vertex
     double capacity; // edge capacity, can also be used for capacity
-    int type;
 
     // auxiliary fields
     bool selected = false;
 
     // used for bidirectional edges
-    Vertex *orig;
     Pipe *reverse = nullptr;
 
-    double flow; // for flow-related problems
+    double flow{}; // for flow-related problems
 };
 
 #endif //DA2324_PROJECT1_EDGE_H

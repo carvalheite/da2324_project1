@@ -18,6 +18,10 @@ private:
     bool loadSmallStations();
     bool loadSmallCities();
     bool loadSmallPipes();
+
+    bool loadLargeReservoir();
+    bool loadLargeStations();
+    bool loadLargeCities();
 };
 
 

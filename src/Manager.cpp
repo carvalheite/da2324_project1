@@ -9,6 +9,19 @@
 #include <string>
 
 
+
+Manager::Manager() {
+    loadSmallReservoir();
+    loadSmallStations();
+    loadSmallCities();
+    loadSmallPipes();
+
+    loadLargeReservoir();
+    loadLargeStations();
+    loadLargeCities();
+    loadLargePipes();
+}
+
 bool Manager::loadSmallReservoir() {
     std::ifstream resevoirs;
     string str;
@@ -34,17 +47,6 @@ bool Manager::loadSmallReservoir() {
     }
     resevoirs.close();
     return true;
-}
-
-Manager::Manager() {
-    loadSmallReservoir();
-    loadSmallStations();
-    loadSmallCities();
-    loadsmal
-
-    loadLargeReservoir();
-    loadLargeStations();
-    loadLargeCities();
 }
 
 bool Manager::loadSmallStations() {
@@ -220,4 +222,31 @@ bool Manager::loadLargeCities() {
     }
     cities.close();
     return false;
+}
+
+bool Manager::loadLargePipes() {
+    std::ifstream pipes;
+    string str;
+
+    pipes.open("../large_dataset/Pipes.csv");
+    if (pipes.is_open()) {
+        getline(pipes,str);
+    } else {
+        cout << "Failed to open cities\n";
+        return false;
+    }
+    while(!pipes.eof()) {
+        //city,id,code,demand,population
+        string serviceA, serviceB, capacity, direction;
+
+        getline(pipes, serviceA,',');
+        getline(pipes, serviceB,',');
+        getline(pipes, capacity,',');
+        getline(pipes, direction);
+        if(serviceA.empty())continue;
+
+        largeGraph.addPipe(serviceA,serviceB,stoi(capacity),direction[0] - '0');
+    }
+    pipes.close();
+    return true;
 }

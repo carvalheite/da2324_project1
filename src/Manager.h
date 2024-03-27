@@ -22,6 +22,7 @@ private:
     bool loadLargeReservoir();
     bool loadLargeStations();
     bool loadLargeCities();
+    bool loadLargePipes();
 };
 
 

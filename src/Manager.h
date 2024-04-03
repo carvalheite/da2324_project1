@@ -17,10 +17,12 @@ private:
     bool loadSmallReservoir();
     bool loadSmallStations();
     bool loadSmallCities();
+    bool loadSmallPipes();
 
     bool loadLargeReservoir();
     bool loadLargeStations();
     bool loadLargeCities();
+    bool loadLargePipes();
 };
 
 

@@ -88,4 +88,15 @@ const std::unordered_map<std::string, City*>& Graph::getCityMap() const {
     return cityMap;
 }
 
+bool Graph::addPipe(const string &codeOrig, const string &codeDest, double capacity, int type) {
+    Vertex* origin = findVertex(codeOrig);
+    Vertex* dest = findVertex(codeDest);
+    if(origin== nullptr || dest == nullptr){cout << "ERROR\n";return false;}
+    Pipe* pipe = new Pipe(origin, dest, capacity, type);
+    origin->addPipe(pipe);
+    if(type==0){origin->addPipe(pipe->getReverse());}
+
+
+}
+
 

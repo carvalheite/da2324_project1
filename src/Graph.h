@@ -14,6 +14,7 @@ public:
     bool addReservoir(int id, const string& code, double maxDelivery, const string& name, string municipality);
     bool addPumpingStation(int id, const std::string& code);
     bool addCity(int id, const string& code, double demand, const string& cityName, int population);
+    bool addPipe(const string& codeOrig, const string& codeDest, double capacity, int type);
 
     Vertex* findVertex(const string& code);
 

@@ -41,6 +41,13 @@ void Vertex::setIncoming(const vector<Pipe*>& incoming) {
     this->incoming = incoming;
 }
 
+bool Vertex::addPipe(Pipe *pipe) {
+    adjacent.push_back(pipe);
+    pipe->getDest()->incoming.push_back(pipe);
+    return true;
+
+}
+
 
 // Getter and Setter for MaxDelivery in Reservoir class
 double Reservoir::getMaxDelivery() const {

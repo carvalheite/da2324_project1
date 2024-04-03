@@ -8,6 +8,20 @@
 #include <sstream>
 #include <string>
 
+
+
+Manager::Manager() {
+    loadSmallReservoir();
+    loadSmallStations();
+    loadSmallCities();
+    loadSmallPipes();
+
+    loadLargeReservoir();
+    loadLargeStations();
+    loadLargeCities();
+    loadLargePipes();
+}
+
 bool Manager::loadSmallReservoir() {
     std::ifstream resevoirs;
     string str;
@@ -16,7 +30,7 @@ bool Manager::loadSmallReservoir() {
         getline(resevoirs,str);
     } else {
         cout << "Failed to open reservoirs\n";
-        return true;
+        return false;
     }
     while(!resevoirs.eof()) {
         string name, id, municipality, code, maxDelivery,ignore;
@@ -32,17 +46,7 @@ bool Manager::loadSmallReservoir() {
         smallGraph.addReservoir(stoi(id), code, stoi(maxDelivery), name, municipality);
     }
     resevoirs.close();
-    return false;
-}
-
-Manager::Manager() {
-    loadSmallReservoir();
-    loadSmallStations();
-    loadSmallCities();
-
-    loadLargeReservoir();
-    loadLargeStations();
-    loadLargeCities();
+    return true;
 }
 
 bool Manager::loadSmallStations() {
@@ -53,7 +57,7 @@ bool Manager::loadSmallStations() {
         getline(stations,str);
     } else {
         cout << "Failed to open stations\n";
-        return true;
+        return false;
     }
     while(!stations.eof()) {
         string id, code,ignore;
@@ -67,7 +71,7 @@ bool Manager::loadSmallStations() {
         smallGraph.addPumpingStation(stoi(id), code);
     }
     stations.close();
-    return false;
+    return true;
 }
 
 bool Manager::loadSmallCities() {
@@ -79,7 +83,7 @@ bool Manager::loadSmallCities() {
         getline(cities,str);
     } else {
         cout << "Failed to open cities\n";
-        return true;
+        return false;
     }
     while(!cities.eof()) {
         //city,id,code,demand,population
@@ -97,7 +101,34 @@ bool Manager::loadSmallCities() {
         smallGraph.addCity(stoi(id), code,stod(demand),city,stoi(population));
     }
     cities.close();
-    return false;
+    return true;
+}
+
+bool Manager::loadSmallPipes() {
+    std::ifstream pipes;
+    string str;
+
+    pipes.open("../small_dataset/Pipes_Madeira.csv");
+    if (pipes.is_open()) {
+        getline(pipes,str);
+    } else {
+        cout << "Failed to open cities\n";
+        return false;
+    }
+    while(!pipes.eof()) {
+        //city,id,code,demand,population
+        string serviceA, serviceB, capacity, direction;
+
+        getline(pipes, serviceA,',');
+        getline(pipes, serviceB,',');
+        getline(pipes, capacity,',');
+        getline(pipes, direction);
+        if(serviceA.empty())continue;
+
+        smallGraph.addPipe(serviceA,serviceB,stoi(capacity),direction[0] - '0');
+    }
+    pipes.close();
+    return true;
 }
 
 bool Manager::loadLargeReservoir() {
@@ -191,4 +222,31 @@ bool Manager::loadLargeCities() {
     }
     cities.close();
     return false;
+}
+
+bool Manager::loadLargePipes() {
+    std::ifstream pipes;
+    string str;
+
+    pipes.open("../large_dataset/Pipes.csv");
+    if (pipes.is_open()) {
+        getline(pipes,str);
+    } else {
+        cout << "Failed to open cities\n";
+        return false;
+    }
+    while(!pipes.eof()) {
+        //city,id,code,demand,population
+        string serviceA, serviceB, capacity, direction;
+
+        getline(pipes, serviceA,',');
+        getline(pipes, serviceB,',');
+        getline(pipes, capacity,',');
+        getline(pipes, direction);
+        if(serviceA.empty())continue;
+
+        largeGraph.addPipe(serviceA,serviceB,stoi(capacity),direction[0] - '0');
+    }
+    pipes.close();
+    return true;
 }

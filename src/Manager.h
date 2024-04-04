@@ -29,6 +29,9 @@ private:
     bool loadLargeCities();
     bool loadLargePipes();
 
+    void adaptSmall();
+    void adaptLarge();
+
     unordered_map<string, Reservoir*> smallReservoirs;
     unordered_map<string, Station*> smallStations;
     unordered_map<string, City*> smallCities;
@@ -37,9 +40,10 @@ private:
     unordered_map<string, Station*> largeStations;
     unordered_map<string, City*> largeCities;
 
+public:
     // Main function implementing the Edmonds-Karp algorithm
     template <class T>
-    void edmondsKarp(Graph<T> *g, int source, int target) {
+    void edmondsKarp(Graph<T> *g, string source, string target) {
 // Find source and target vertices in the graph
         Vertex<T>* s = g->findVertex(source);
         Vertex<T>* t = g->findVertex(target);
@@ -133,6 +137,8 @@ private:
 // Return true if a path to the target is found, false otherwise
         return t->isVisited();
     }
+
+
 };
 
 #endif //DA2324_PROJECT1_MANAGER_H

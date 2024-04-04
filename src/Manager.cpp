@@ -20,6 +20,9 @@ Manager::Manager() {
     loadLargeStations();
     loadLargeCities();
     loadLargePipes();
+
+    adaptSmall();
+    adaptLarge();
 }
 
 bool Manager::loadSmallReservoir() {
@@ -269,4 +272,38 @@ bool Manager::loadLargePipes() {
     }
     pipes.close();
     return true;
+}
+
+void Manager::adaptSmall() {
+    smallGraph.addVertex("SuperSource");
+    smallGraph.addVertex("SuperTarget");
+
+    for(auto vertex : smallGraph.getVertexSet()){
+        if (vertex->getInfo()[0] == 'R') {
+            auto reservoir = smallReservoirs[vertex->getInfo()];
+            smallGraph.addEdge("SuperSource", vertex->getInfo(), reservoir->getMaxDelivery());
+        }
+
+        else if (vertex->getInfo()[0] == 'C') {
+            auto city = smallCities[vertex->getInfo()];
+            smallGraph.addEdge(vertex->getInfo(), "SuperTarget", city->getDemand());
+        }
+    }
+}
+
+void Manager::adaptLarge() {
+    largeGraph.addVertex("SuperSource");
+    largeGraph.addVertex("SuperTarget");
+
+    for(auto vertex : largeGraph.getVertexSet()){
+        if (vertex->getInfo()[0] == 'R') {
+            auto reservoir = largeReservoirs[vertex->getInfo()];
+            largeGraph.addEdge("SuperSource", vertex->getInfo(), reservoir->getMaxDelivery());
+        }
+
+        else if (vertex->getInfo()[0] == 'C') {
+            auto city = largeCities[vertex->getInfo()];
+            largeGraph.addEdge(vertex->getInfo(), "SuperTarget", city->getDemand());
+        }
+    }
 }

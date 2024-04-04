@@ -127,8 +127,15 @@ bool Manager::loadSmallPipes() {
         getline(pipes, direction);
         if(serviceA.empty())continue;
 
+        if (stoi(direction) == 0) {
+            smallGraph.addBidirectionalEdge(serviceA, serviceB, stod(capacity));
+        } else if (stoi(direction) == 1) {
+            smallGraph.addEdge(serviceA, serviceB, stod(capacity));
+        } else {
+            cout << "Couldn't add pipe" << endl;
+            return false;
+        }
 
-        //smallGraph.addPipe(serviceA,serviceB,stoi(capacity),direction[0] - '0');
     }
     pipes.close();
     return true;
@@ -251,7 +258,14 @@ bool Manager::loadLargePipes() {
         getline(pipes, direction);
         if(serviceA.empty())continue;
 
-        //largeGraph.addPipe(serviceA,serviceB,stoi(capacity),direction[0] - '0');
+        if (stoi(direction) == 0) {
+            largeGraph.addBidirectionalEdge(serviceA, serviceB, stod(capacity));
+        } else if (stoi(direction) == 1) {
+            largeGraph.addEdge(serviceA, serviceB, stod(capacity));
+        } else {
+            cout << "Couldn't add pipe" << endl;
+            return false;
+        }
     }
     pipes.close();
     return true;

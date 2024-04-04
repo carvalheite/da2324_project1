@@ -41,10 +41,20 @@ private:
     unordered_map<string, City*> largeCities;
 
 public:
+
+    //[T2.1: 4.0 points] Determine the maximum amount of water that can reach each or a specific city
+    void maxWaterFlowForCity(Graph<string>* currGraph,const string& cityCode,const string& graphSize);
+
+    template <class T>
+    double calculateMaxFlow(Graph<string>* g, const string &sink);
+
+    static void printMaxFlowResults(const vector<pair<string,double>>& result);
+
+
     // Main function implementing the Edmonds-Karp algorithm
     template <class T>
-    void edmondsKarp(Graph<T> *g, string source, string target) {
-// Find source and target vertices in the graph
+    void edmondsKarp(Graph<T> *g, string source, string target){
+        // Find source and target vertices in the graph
         Vertex<T>* s = g->findVertex(source);
         Vertex<T>* t = g->findVertex(target);
 // Validate source and target vertices

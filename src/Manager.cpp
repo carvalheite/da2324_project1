@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <cfloat>
 
 using namespace std;
 
@@ -306,4 +307,61 @@ void Manager::adaptLarge() {
             largeGraph.addEdge(vertex->getInfo(), "SuperTarget", city->getDemand());
         }
     }
+}
+
+void Manager::printMaxFlowResults(const vector<pair<string,double>>& result) {
+    std::cout << "*-------------------------------------------*" << std::endl;
+    std::cout << "*      MAX FLOW RESULTS                     *" << std::endl;
+    std::cout << "*-------------------------------------------*" << std::endl;
+    for (const auto& pair : result) {
+        std::cout << "| CITY CODE: " << pair.first << " ----> RESULT: " << pair.second << " |" << std::endl;
+    }
+    std::cout << "*-------------------------------------------*" << std::endl;
+}
+
+
+void Manager::maxWaterFlowForCity(Graph<string> *currGraph, const string& cityCode,const string& graphSize) {
+
+    auto reservoirMap = (graphSize == "small") ? smallReservoirs : largeReservoirs;
+    auto cityMap = (graphSize == "small") ? smallCities : largeCities;
+    vector<pair<string,double>> result;
+
+
+    if (currGraph->findVertex(cityCode) == nullptr && cityCode != "all") {
+        cout << "ERROR: INVALID CITY";
+        return;
+    }
+    if(cityCode=="all"){
+        for(auto c : cityMap) {
+            double maxFlow = 0;
+            for (auto x: reservoirMap) {
+                edmondsKarp(currGraph, x.first, c.first);
+                maxFlow = std::max(maxFlow, calculateMaxFlow<string>(currGraph, c.first));
+            }
+            result.emplace_back(c.first, maxFlow);
+        }
+    }
+    else {
+        double maxFlow = 0;
+        for (auto x: reservoirMap) {
+            edmondsKarp(currGraph, x.first, cityCode);
+            maxFlow = std::max(maxFlow, calculateMaxFlow<string>(currGraph, cityCode));
+        }
+        result.emplace_back(cityCode, maxFlow);
+    }
+
+    printMaxFlowResults(result);
+
+}
+
+template <class T>
+double Manager::calculateMaxFlow(Graph<string>* g, const string &sink) {
+    double maxFlow = 0.0;
+    Vertex<T> *sinkVertex = g->findVertex(sink);
+    // Iterate through all outgoing edges from the sink vertex
+    for (auto e : sinkVertex->getIncoming()) {
+        maxFlow += e->getFlow();
+    }
+
+    return maxFlow;
 }

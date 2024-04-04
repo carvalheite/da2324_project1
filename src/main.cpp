@@ -61,7 +61,6 @@ int main() {
     Graph<string> *small = &manager.smallGraph;
     Graph<string> *large = &manager.largeGraph;
 
-    manager.edmondsKarp(small, "SuperSource", "SuperTarget");
-
+    manager.maxWaterFlowForCity(small,"all","small");
     return 0;
 }

@@ -8,7 +8,7 @@
 #include <sstream>
 #include <string>
 
-
+using namespace std;
 
 Manager::Manager() {
     loadSmallReservoir();
@@ -43,7 +43,8 @@ bool Manager::loadSmallReservoir() {
         getline(resevoirs, maxDelivery,',');
         getline(resevoirs, ignore,',');
 
-        smallGraph.addReservoir(stoi(id), code, stoi(maxDelivery), name, municipality);
+        smallReservoirs[code] = new Reservoir(name, municipality, stoi(id), code, stoi(maxDelivery));
+        smallGraph.addVertex(code);
     }
     resevoirs.close();
     return true;
@@ -67,8 +68,8 @@ bool Manager::loadSmallStations() {
         getline(stations, ignore,',');
         if(code=="")continue;
 
-
-        smallGraph.addPumpingStation(stoi(id), code);
+        smallStations[code] = new Station(stoi(id), code);
+        smallGraph.addVertex(code);
     }
     stations.close();
     return true;
@@ -98,7 +99,8 @@ bool Manager::loadSmallCities() {
 
         if(code=="")continue;
 
-        smallGraph.addCity(stoi(id), code,stod(demand),city,stoi(population));
+        smallCities[code] = new City(city, stoi(id), code, stod(demand), stoi(population));
+        smallGraph.addVertex(code);
     }
     cities.close();
     return true;
@@ -125,7 +127,8 @@ bool Manager::loadSmallPipes() {
         getline(pipes, direction);
         if(serviceA.empty())continue;
 
-        smallGraph.addPipe(serviceA,serviceB,stoi(capacity),direction[0] - '0');
+
+        //smallGraph.addPipe(serviceA,serviceB,stoi(capacity),direction[0] - '0');
     }
     pipes.close();
     return true;
@@ -156,7 +159,9 @@ bool Manager::loadLargeReservoir() {
         getline(ss, id,',');
         getline(ss, code,',');
         getline(ss, maxDelivery,',');
-        largeGraph.addReservoir(stoi(id), code, stoi(maxDelivery), name, municipality);
+
+        largeGraph.addVertex(code);
+        largeReservoirs[code] = new Reservoir(name, municipality, stoi(id), code, stoi(maxDelivery));
     }
     resevoirs.close();
     return false;
@@ -184,8 +189,8 @@ bool Manager::loadLargeStations() {
         getline(ss, code,',');
         if(code=="")continue;
 
-
-        largeGraph.addPumpingStation(stoi(id), code);
+        largeStations[code] = new Station(stoi(id), code);
+        largeGraph.addVertex(code);
     }
     stations.close();
     return false;
@@ -218,7 +223,8 @@ bool Manager::loadLargeCities() {
 
         if(code=="")continue;
 
-        largeGraph.addCity(stoi(id), code,stod(demand),city,stoi(population));
+        largeCities[code] = new City(city, stoi(id), code, stod(demand), stoi(population));
+        largeGraph.addVertex(code);
     }
     cities.close();
     return false;
@@ -245,7 +251,7 @@ bool Manager::loadLargePipes() {
         getline(pipes, direction);
         if(serviceA.empty())continue;
 
-        largeGraph.addPipe(serviceA,serviceB,stoi(capacity),direction[0] - '0');
+        //largeGraph.addPipe(serviceA,serviceB,stoi(capacity),direction[0] - '0');
     }
     pipes.close();
     return true;

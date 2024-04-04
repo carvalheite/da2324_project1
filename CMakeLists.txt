@@ -12,4 +12,10 @@ add_executable(da2324_project1
         src/Graph.h
         src/Manager.h
         src/Manager.cpp
-        src/Graph.cpp)
+        src/Graph.cpp
+        src/City.cpp
+        src/City.h
+        src/Reservoir.cpp
+        src/Reservoir.h
+        src/Station.cpp
+        src/Station.h)

@@ -47,6 +47,7 @@ private:
 
 
 
+/*
 class Reservoir :   public Vertex {
 public:
     Reservoir(int id, string code, double maxDelivery, string name, string municipality): Vertex(id, code), maxDelivery(maxDelivery), name(name), municipality(municipality) {}
@@ -102,6 +103,7 @@ private:
 };
 
 
+*/
 
 
 #endif //DA2324_PROJECT1_VERTEX_H

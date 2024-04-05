@@ -309,9 +309,9 @@ void Manager::adaptLarge() {
     }
 }
 
-void Manager::printMaxFlowResults(const vector<pair<string,double>>& result) {
+void Manager::printResults(const vector<pair<string,double>>& result, const string& title) {
     std::cout << "*-------------------------------------------*" << std::endl;
-    std::cout << "*      MAX FLOW RESULTS                     *" << std::endl;
+    std::cout << "*      "<< title << "                     *" << std::endl;
     std::cout << "*-------------------------------------------*" << std::endl;
     for (const auto& pair : result) {
         std::cout << "| CITY CODE: " << pair.first << " ----> RESULT: " << pair.second << " |" << std::endl;
@@ -320,7 +320,7 @@ void Manager::printMaxFlowResults(const vector<pair<string,double>>& result) {
 }
 
 
-void Manager::maxWaterFlowForCity(Graph<string> *currGraph, const string& cityCode,const string& graphSize) {
+vector<pair<string,double>> Manager::maxWaterFlowForCity(Graph<string> *currGraph, const string& cityCode,const string& graphSize, bool print) {
 
     auto reservoirMap = (graphSize == "small") ? smallReservoirs : largeReservoirs;
     auto cityMap = (graphSize == "small") ? smallCities : largeCities;
@@ -329,7 +329,7 @@ void Manager::maxWaterFlowForCity(Graph<string> *currGraph, const string& cityCo
 
     if (currGraph->findVertex(cityCode) == nullptr && cityCode != "all") {
         cout << "ERROR: INVALID CITY";
-        return;
+        return result;
     }
     if(cityCode=="all"){
         for(auto c : cityMap) {
@@ -350,9 +350,34 @@ void Manager::maxWaterFlowForCity(Graph<string> *currGraph, const string& cityCo
         result.emplace_back(cityCode, maxFlow);
     }
 
-    printMaxFlowResults(result);
-
+    if(print)printResults(result,"Max Flow Values");
+    return result;
 }
+
+double findDouble(const vector<pair<string, double>>& vec, const string& str) {
+    for (const auto &p: vec) {
+        if (p.first == str) {
+            return p.second;
+        }
+    }
+    return 0;
+}
+
+void Manager::checkWaterDeficit(Graph<string> *currGraph, const string &graphSize) {
+
+    vector<pair<string,double>> flowValues = maxWaterFlowForCity(currGraph,"all",graphSize,false);
+    vector<pair<string,double>> result;
+    auto cityMap = (graphSize == "small") ? smallCities : largeCities;
+    double  currFlow;
+
+    for(auto city : cityMap){
+        currFlow = findDouble(flowValues , city.first);
+        if(city.second->getDemand()>currFlow){result.emplace_back(city.first,city.second->getDemand()-currFlow);}
+    }
+    printResults(result,"Water Deficit");
+}
+
+
 
 template <class T>
 double Manager::calculateMaxFlow(Graph<string>* g, const string &sink) {

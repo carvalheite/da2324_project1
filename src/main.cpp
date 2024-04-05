@@ -61,6 +61,8 @@ int main() {
     Graph<string> *small = &manager.smallGraph;
     Graph<string> *large = &manager.largeGraph;
 
-    manager.maxWaterFlowForCity(small,"all","small");
+    manager.maxWaterFlowForCity(small,"all","small",true);
+    manager.checkWaterDeficit(small,"small");
+
     return 0;
 }

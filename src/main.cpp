@@ -66,13 +66,6 @@ int main() {
    // manager.maxWaterFlowForCity(small,"all","small");
 
 
-    cout << "Before Removal" << endl;
-
-    manager.removeReservoirCheckImpact(manager.largeGraph);
-
-    cout << "After Removal" << endl;
-    Vertex<string> *removed = manager.largeGraph.findVertex("R_1");
+    manager.removeReservoirCheckImpact(&manager.smallGraph);
     return 0;
-
-    retrun 0;
 }

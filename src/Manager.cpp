@@ -90,16 +90,20 @@ bool Manager::loadSmallCities() {
         cout << "Failed to open cities\n";
         return false;
     }
-    while(!cities.eof()) {
-        //city,id,code,demand,population
-        string id, code, demand ,population,city;
+    while(getline(cities, str)) {
+        str.erase(std::remove(str.begin(), str.end(), '\r' ), str.end());
+        str.erase(std::remove(str.begin(), str.end(), '\n' ), str.end());
 
-        getline(cities, city,',');
-        getline(cities, id,',');
-        getline(cities, code,',');
-        getline(cities, demand,',');
-        getline(cities, population,'"');
-        getline(cities, population,'"');
+        string id, code, demand, population, city;
+
+        stringstream ss(str);
+
+        getline(ss, city,',');
+        getline(ss, id,',');
+        getline(ss, code,',');
+        getline(ss, demand,',');
+        getline(ss, population,'"');
+        getline(ss, population,'"');
 
         if(code=="")continue;
 
@@ -319,6 +323,13 @@ void Manager::printMaxFlowResults(const vector<pair<string,double>>& result) {
     std::cout << "*-------------------------------------------*" << std::endl;
 }
 
+void Manager::resetFlow(Graph<std::string> *g) {
+    for (auto vertex : g->getVertexSet()) {
+        for (auto edge : vertex->getAdj()) {
+            edge->setFlow(0);
+        }
+    }
+}
 
 void Manager::maxWaterFlowForCity(Graph<string> *currGraph, const string& cityCode,const string& graphSize) {
 
@@ -354,15 +365,14 @@ void Manager::maxWaterFlowForCity(Graph<string> *currGraph, const string& cityCo
 
 }
 
-void Manager::removeReservoirCheckImpact(Graph<std::string> g) {
+void Manager::removeReservoirCheckImpact(Graph<std::string> *g) {
     unordered_map<string, City *> *cities;
     unordered_map<string, Reservoir *> *reservoirs;
     unordered_map<string, int> originalDeliveries;
-    string reservoirCode;
     set<string> removedReservoirs;
-    set<City *> affectedCities;
+    unordered_map<string, unordered_map<string, double>> reservoirPipeInfo;
 
-    if (g.getVertexSet().size() > 100) {
+    if (g->getVertexSet().size() > 100) {
         cities = &largeCities;
         reservoirs = &largeReservoirs;
     } else {
@@ -371,39 +381,40 @@ void Manager::removeReservoirCheckImpact(Graph<std::string> g) {
     }
 
     while (true) {
+        set<City *> affectedCities;
+        string reservoirCode;
         cout << "Which reservoir do you want to remove?" << endl;
         cin >> reservoirCode;
         cout << endl;
 
-        originalDeliveries[reservoirCode] = reservoirs->at(reservoirCode)->getMaxDelivery();
-        reservoirs->at(reservoirCode)->setMaxDelivery(0);
+        unordered_map<string, double> maxFlowCity;
+        edmondsKarp(g, "SuperSource", "SuperTarget");
+        for (const auto& city : *cities) {
+            maxFlowCity[city.first] = calculateMaxFlow<string>(g, city.first);
+        }
+
+        unordered_map<string, double> originalPipeCapacity;
+        for (auto pipe: g->findVertex(reservoirCode)->getAdj()) {
+            originalPipeCapacity[pipe->getDest()->getInfo()] = pipe->getWeight();
+            pipe->setWeight(0);
+        }
         removedReservoirs.insert(reservoirCode);
+        reservoirPipeInfo[reservoirCode] = originalPipeCapacity;
 
-        for (const auto &cityPair: *cities) {
-            string cityCode = cityPair.first;
-            City *city = cityPair.second;
+        edmondsKarp(g, "SuperSource", "SuperTarget");
 
-            double maxFlow = 0;
-            for (const auto &reservoirPair: *reservoirs) {
-                string sourceReservoirCode = reservoirPair.first;
-
-                if (sourceReservoirCode == reservoirCode) continue;
-
-                edmondsKarp(&g, sourceReservoirCode, cityCode);
-                maxFlow += calculateMaxFlow<string>(&g, cityCode);
-            }
-
-            if (maxFlow < city->getDemand()) {
-                affectedCities.insert(city);
+        for (const auto& city : *cities) {
+            if (calculateMaxFlow<string>(g, city.first) < maxFlowCity[city.first]) {
+                affectedCities.insert(city.second);
             }
         }
 
         cout << "Cities affected by the removal of the reservoirs:" << endl;
         for (City *city: affectedCities) {
-            cout << city->getCode() << " - " << city->getName() << endl << endl;
+            cout << city->getCode() << " - " << city->getName() << endl;
         }
 
-        cout << "Do you want to remove more reservoirs? (Y/N)" << endl;
+        cout << endl << "Do you want to remove more reservoirs? (Y/N)" << endl;
         char answer;
         cin >> answer;
         while (answer != 'Y' && answer != 'N' && answer != 'y' && answer != 'n') {
@@ -415,8 +426,37 @@ void Manager::removeReservoirCheckImpact(Graph<std::string> g) {
         }
     }
 
-    for (string reservoir: removedReservoirs) {
-        reservoirs->at(reservoirCode)->setMaxDelivery(originalDeliveries[reservoirCode]);
+    for (const string& reservoir: removedReservoirs) {
+        for (auto pipe: g->findVertex(reservoir)->getAdj()) {
+            pipe->setWeight(reservoirPipeInfo[reservoir][pipe->getDest()->getInfo()]);
+        }
+    }
+
+}
+
+void Manager::removeStationCheckImpact(Graph<string> g) {
+    unordered_map<string, City *> *cities;
+    unordered_map<string, Station *> *stations;
+
+    if (g.getVertexSet().size() > 100) {
+        cities = &largeCities;
+        stations = &largeStations;
+    } else {
+        cities = &smallCities;
+        stations = &smallStations;
+    }
+
+    for (const auto& stationPair : *stations) {
+        string stationCode = stationPair.first;
+        Station *station = stationPair.second;
+        unordered_map<string, double> originalPipeCapacity;
+
+        for (auto pipe : g.findVertex(stationCode)->getAdj()) {
+            originalPipeCapacity[pipe->getDest()->getInfo()] = pipe->getWeight();
+            pipe->setWeight(0);
+        }
+
+
     }
 
 }
@@ -432,4 +472,6 @@ double Manager::calculateMaxFlow(Graph<string>* g, const string &sink) {
 
     return maxFlow;
 }
+
+
 

@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <cfloat>
+#include <set>
 
 using namespace std;
 
@@ -82,7 +83,6 @@ bool Manager::loadSmallStations() {
 bool Manager::loadSmallCities() {
     std::ifstream cities;
     string str;
-
     cities.open("../small_dataset/Cities_Madeira.csv");
     if (cities.is_open()) {
         getline(cities,str);
@@ -354,6 +354,73 @@ void Manager::maxWaterFlowForCity(Graph<string> *currGraph, const string& cityCo
 
 }
 
+void Manager::removeReservoirCheckImpact(Graph<std::string> g) {
+    unordered_map<string, City *> *cities;
+    unordered_map<string, Reservoir *> *reservoirs;
+    unordered_map<string, int> originalDeliveries;
+    string reservoirCode;
+    set<string> removedReservoirs;
+    set<City *> affectedCities;
+
+    if (g.getVertexSet().size() > 100) {
+        cities = &largeCities;
+        reservoirs = &largeReservoirs;
+    } else {
+        cities = &smallCities;
+        reservoirs = &smallReservoirs;
+    }
+
+    while (true) {
+        cout << "Which reservoir do you want to remove?" << endl;
+        cin >> reservoirCode;
+        cout << endl;
+
+        originalDeliveries[reservoirCode] = reservoirs->at(reservoirCode)->getMaxDelivery();
+        reservoirs->at(reservoirCode)->setMaxDelivery(0);
+        removedReservoirs.insert(reservoirCode);
+
+        for (const auto &cityPair: *cities) {
+            string cityCode = cityPair.first;
+            City *city = cityPair.second;
+
+            double maxFlow = 0;
+            for (const auto &reservoirPair: *reservoirs) {
+                string sourceReservoirCode = reservoirPair.first;
+
+                if (sourceReservoirCode == reservoirCode) continue;
+
+                edmondsKarp(&g, sourceReservoirCode, cityCode);
+                maxFlow += calculateMaxFlow<string>(&g, cityCode);
+            }
+
+            if (maxFlow < city->getDemand()) {
+                affectedCities.insert(city);
+            }
+        }
+
+        cout << "Cities affected by the removal of the reservoirs:" << endl;
+        for (City *city: affectedCities) {
+            cout << city->getCode() << " - " << city->getName() << endl << endl;
+        }
+
+        cout << "Do you want to remove more reservoirs? (Y/N)" << endl;
+        char answer;
+        cin >> answer;
+        while (answer != 'Y' && answer != 'N' && answer != 'y' && answer != 'n') {
+            cout << "Invalid answer. Please type y)es or (n)o." << endl;
+            cin >> answer;
+        }
+        if (answer == 'N' || answer == 'n') {
+            break;
+        }
+    }
+
+    for (string reservoir: removedReservoirs) {
+        reservoirs->at(reservoirCode)->setMaxDelivery(originalDeliveries[reservoirCode]);
+    }
+
+}
+
 template <class T>
 double Manager::calculateMaxFlow(Graph<string>* g, const string &sink) {
     double maxFlow = 0.0;
@@ -365,3 +432,4 @@ double Manager::calculateMaxFlow(Graph<string>* g, const string &sink) {
 
     return maxFlow;
 }
+

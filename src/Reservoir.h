@@ -15,6 +15,7 @@ public:
     int getId() const { return id; }
     string getCode() const { return code; }
     int getMaxDelivery() const { return maxDelivery; }
+    void setMaxDelivery(int delivery);
 
 private:
     string name;

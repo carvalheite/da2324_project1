@@ -11,3 +11,7 @@ Reservoir::Reservoir(string name, string municipality, int id, string code, int 
     this->code = code;
     this->maxDelivery = maxDelivery;
 }
+
+void Reservoir::setMaxDelivery(int delivery) {
+    this->maxDelivery = delivery;
+}

@@ -58,9 +58,21 @@ int main() {
         cout << edge->getOrig()->getInfo() << " to " << edge->getDest()->getInfo() << endl;
     }*/
 
-    Graph<string> *small = &manager.smallGraph;
+    /*Graph<string> *small = &manager.smallGraph;
     Graph<string> *large = &manager.largeGraph;
 
-    manager.maxWaterFlowForCity(small,"all","small");
+    cout << "Number of elements (small):" << endl << small->getVertexSet().size() << endl;
+    cout << "Number of elements (large):" << endl << large->getVertexSet().size() << endl;*/
+   // manager.maxWaterFlowForCity(small,"all","small");
+
+
+    cout << "Before Removal" << endl;
+
+    manager.removeReservoirCheckImpact(manager.largeGraph);
+
+    cout << "After Removal" << endl;
+    Vertex<string> *removed = manager.largeGraph.findVertex("R_1");
     return 0;
+
+    retrun 0;
 }

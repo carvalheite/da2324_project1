@@ -323,14 +323,6 @@ void Manager::printMaxFlowResults(const vector<pair<string,double>>& result) {
     std::cout << "*-------------------------------------------*" << std::endl;
 }
 
-void Manager::resetFlow(Graph<std::string> *g) {
-    for (auto vertex : g->getVertexSet()) {
-        for (auto edge : vertex->getAdj()) {
-            edge->setFlow(0);
-        }
-    }
-}
-
 void Manager::maxWaterFlowForCity(Graph<string> *currGraph, const string& cityCode,const string& graphSize) {
 
     auto reservoirMap = (graphSize == "small") ? smallReservoirs : largeReservoirs;
@@ -368,7 +360,6 @@ void Manager::maxWaterFlowForCity(Graph<string> *currGraph, const string& cityCo
 void Manager::removeReservoirCheckImpact(Graph<std::string> *g) {
     unordered_map<string, City *> *cities;
     unordered_map<string, Reservoir *> *reservoirs;
-    unordered_map<string, int> originalDeliveries;
     set<string> removedReservoirs;
     unordered_map<string, unordered_map<string, double>> reservoirPipeInfo;
 
@@ -388,6 +379,7 @@ void Manager::removeReservoirCheckImpact(Graph<std::string> *g) {
         cout << endl;
 
         unordered_map<string, double> maxFlowCity;
+        unordered_map<string, double> newFlowCity;
         edmondsKarp(g, "SuperSource", "SuperTarget");
         for (const auto& city : *cities) {
             maxFlowCity[city.first] = calculateMaxFlow<string>(g, city.first);
@@ -404,7 +396,7 @@ void Manager::removeReservoirCheckImpact(Graph<std::string> *g) {
         edmondsKarp(g, "SuperSource", "SuperTarget");
 
         for (const auto& city : *cities) {
-            if (calculateMaxFlow<string>(g, city.first) < maxFlowCity[city.first]) {
+            if ((newFlowCity[city.first] = calculateMaxFlow<string>(g, city.first)) < maxFlowCity[city.first]) {
                 affectedCities.insert(city.second);
             }
         }
@@ -412,6 +404,7 @@ void Manager::removeReservoirCheckImpact(Graph<std::string> *g) {
         cout << "Cities affected by the removal of the reservoirs:" << endl;
         for (City *city: affectedCities) {
             cout << city->getCode() << " - " << city->getName() << endl;
+            cout << "Original flow: " << maxFlowCity[city->getCode()] << " | New flow: " << newFlowCity[city->getCode()] << endl << endl;
         }
 
         cout << endl << "Do you want to remove more reservoirs? (Y/N)" << endl;
@@ -434,11 +427,12 @@ void Manager::removeReservoirCheckImpact(Graph<std::string> *g) {
 
 }
 
-void Manager::removeStationCheckImpact(Graph<string> g) {
+void Manager::removeStationCheckImpact(Graph<string> *g) {
     unordered_map<string, City *> *cities;
     unordered_map<string, Station *> *stations;
+    unordered_map<string, int> originalDeliveries;
 
-    if (g.getVertexSet().size() > 100) {
+    if (g->getVertexSet().size() > 100) {
         cities = &largeCities;
         stations = &largeStations;
     } else {
@@ -446,19 +440,82 @@ void Manager::removeStationCheckImpact(Graph<string> g) {
         stations = &smallStations;
     }
 
-    for (const auto& stationPair : *stations) {
-        string stationCode = stationPair.first;
-        Station *station = stationPair.second;
-        unordered_map<string, double> originalPipeCapacity;
+    cout << "Do you wish to check a single station or all of them?" << endl;
+    cout << "1. Single station" << endl << "2. All stations" << endl;
+    int option;
+    cin >> option;
+    while (option != 1 && option != 2) {
+        cout << "Invalid option. Please type 1 or 2." << endl;
+        cin >> option;
+    }
 
-        for (auto pipe : g.findVertex(stationCode)->getAdj()) {
+    string stationCode;
+
+    if (option == 1) {
+        cout << "Which station do you want to remove?" << endl;
+        cin >> stationCode;
+        cout << endl;
+    }
+
+    for (const auto& station : *stations) {
+        set<City *> affectedCities;
+
+        if (option == 1) {
+            cout << "Which station do you want to remove?" << endl;
+            cin >> stationCode;
+            cout << endl;
+        }
+
+        if (option == 2) {
+            stationCode = station.first;
+            cout << "SELECTED STATION: " << stationCode << endl;
+        }
+
+        unordered_map<string, double> maxFlowCity;
+        unordered_map<string, double> newFlowCity;
+
+        edmondsKarp(g, "SuperSource", "SuperTarget");
+        for (const auto& city : *cities) {
+            maxFlowCity[city.first] = calculateMaxFlow<string>(g, city.first);
+        }
+
+        unordered_map<string, double> originalPipeCapacity;
+        for (auto pipe: g->findVertex(stationCode)->getAdj()) {
             originalPipeCapacity[pipe->getDest()->getInfo()] = pipe->getWeight();
             pipe->setWeight(0);
         }
 
+        edmondsKarp(g, "SuperSource", "SuperTarget");
 
+        for (const auto& city : *cities) {
+            if ((newFlowCity[city.first] = calculateMaxFlow<string>(g, city.first)) < maxFlowCity[city.first]) {
+                affectedCities.insert(city.second);
+            }
+        }
+
+        cout << "Cities affected by the removal of the station:" << endl;
+        for (City *city: affectedCities) {
+            cout << city->getCode() << " - " << city->getName() << endl;
+            cout << "Original flow: " << maxFlowCity[city->getCode()] << " | New flow: " << newFlowCity[city->getCode()] << endl << endl;
+        }
+
+        for (auto pipe: g->findVertex(stationCode)->getAdj()) {
+            pipe->setWeight(originalPipeCapacity[pipe->getDest()->getInfo()]);
+        }
+
+        if (option == 1) {
+            cout << endl << "Do you want to remove a different station? (Y/N)" << endl;
+            char answer;
+            cin >> answer;
+            while (answer != 'Y' && answer != 'N' && answer != 'y' && answer != 'n') {
+                cout << "Invalid answer. Please type y)es or (n)o." << endl;
+                cin >> answer;
+            }
+            if (answer == 'N' || answer == 'n') {
+                break;
+            }
+        }
     }
-
 }
 
 template <class T>

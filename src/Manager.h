@@ -48,15 +48,13 @@ public:
     template <class T>
     double calculateMaxFlow(Graph<string>* g, const string &sink);
 
-    void resetFlow(Graph<string>* g);
-
     static void printMaxFlowResults(const vector<pair<string,double>>& result);
 
     //[T3.1: 2.0 points] Evaluate what happens if one specific water reservoir is out of commission
     void removeReservoirCheckImpact(Graph<string> *g);
 
     //[T3.2: 2.0 points] Evaluate what happens when pumping stations are removed from the network
-    void removeStationCheckImpact(Graph<string> g);
+    void removeStationCheckImpact(Graph<string> *g);
 
     // Main function implementing the Edmonds-Karp algorithm
     template <class T>

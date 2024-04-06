@@ -66,6 +66,5 @@ int main() {
    // manager.maxWaterFlowForCity(small,"all","small");
 
 
-    manager.removeReservoirCheckImpact(&manager.smallGraph);
     return 0;
 }

@@ -518,6 +518,86 @@ void Manager::removeStationCheckImpact(Graph<string> *g) {
     }
 }
 
+void Manager::removePipeCheckImpact(Graph<string> *g) {
+    unordered_map<string, City *> *cities;
+    unordered_map<string, int> originalDeliveries;
+    set<Edge<string> *> removedPipes;
+
+    if (g->getVertexSet().size() > 100) {
+        cities = &largeCities;
+    } else {
+        cities = &smallCities;
+    }
+
+    cout << "Which pipes do you wish to remove? Type 'Q' to stop." << endl
+         << "(Format: 'PS_1 PS_2')" << endl;
+
+    while (true) {
+        string orig, dest;
+        cin >> orig;
+        if (orig == "Q" or orig == "q") break;
+        cin >> dest;
+        if (dest == "Q" or orig == "q") break;
+
+        if (g->findVertex(orig) == nullptr) {
+            cout << "Invalid origin station. Please try again." << endl;
+            continue;
+        }
+        if (g->findVertex(dest) == nullptr) {
+            cout << "Invalid destination station. Please try again." << endl;
+            continue;
+        }
+
+        Vertex<string>* origin = g->findVertex(orig);
+        Vertex<string>* destination = g->findVertex(dest);
+
+        for (auto edge: origin->getAdj()) {
+            if (edge->getDest() == destination) {
+                removedPipes.insert(edge);
+                break;
+            }
+        }
+    }
+
+    set<City *> affectedCities;
+    unordered_map<string, double> maxFlowCity;
+    unordered_map<string, double> newFlowCity;
+
+    edmondsKarp(g, "SuperSource", "SuperTarget");
+
+    for (const auto& city : *cities) {
+        maxFlowCity[city.first] = calculateMaxFlow<string>(g, city.first);
+    }
+
+    unordered_map<Edge<string>*, double> originalPipeCapacity;
+    for (auto pipe: removedPipes) {
+        originalPipeCapacity[pipe] = pipe->getWeight();
+        pipe->setWeight(0);
+    }
+
+    edmondsKarp(g, "SuperSource", "SuperTarget");
+
+    for (const auto& city : *cities) {
+        if ((newFlowCity[city.first] = calculateMaxFlow<string>(g, city.first)) < maxFlowCity[city.first]) {
+            affectedCities.insert(city.second);
+        }
+    }
+
+    if (affectedCities.empty()) cout << "No cities were affected by the removal of the pipe(s).";
+    else {
+        cout << "Cities affected by the removal of the pipe(s):" << endl;
+        for (City *city: affectedCities) {
+            cout << city->getCode() << " - " << city->getName() << endl;
+            cout << "Original flow: " << maxFlowCity[city->getCode()] << " | New flow: " << newFlowCity[city->getCode()]
+                 << endl << endl;
+        }
+    }
+
+    for (auto pipe: removedPipes) {
+        pipe->setWeight(originalPipeCapacity[pipe]);
+    }
+}
+
 template <class T>
 double Manager::calculateMaxFlow(Graph<string>* g, const string &sink) {
     double maxFlow = 0.0;

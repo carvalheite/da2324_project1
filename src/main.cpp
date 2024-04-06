@@ -65,6 +65,6 @@ int main() {
     cout << "Number of elements (large):" << endl << large->getVertexSet().size() << endl;*/
    // manager.maxWaterFlowForCity(small,"all","small");
 
-
+    manager.removePipeCheckImpact(&manager.smallGraph);
     return 0;
 }

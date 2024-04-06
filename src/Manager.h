@@ -56,6 +56,9 @@ public:
     //[T3.2: 2.0 points] Evaluate what happens when pumping stations are removed from the network
     void removeStationCheckImpact(Graph<string> *g);
 
+    //[T3.3: 2.0 points] Evaluate what happens when pipes are removed from the network
+    void removePipeCheckImpact(Graph<string> *g);
+
     // Main function implementing the Edmonds-Karp algorithm
     template <class T>
     void edmondsKarp(Graph<T> *g, string source, string target){

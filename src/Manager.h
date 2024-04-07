@@ -43,19 +43,83 @@ private:
 public:
 
     //[T2.1: 4.0 points] Determine the maximum amount of water that can reach each or a specific city
+
+    /**
+    * @brief Calculates and returns the maximum water flow for each city.
+    *
+    * This function calculates the maximum water flow for each city in the network
+    * and returns the result. It also optionally prints the maximum flow for each city.
+    *
+    * @param currGraph Pointer to the graph representing the water supply network.
+    * @param cityCode The code of the city for which to calculate the maximum flow, or "all" to calculate for all cities.
+    * @param graphSize The size of the graph ("small" or "large").
+    * @param print Flag indicating whether to print the maximum flow for each city.
+    * @return A vector containing pairs of cities and their corresponding maximum flows.
+    */
     vector<pair<City *, double>> maxWaterFlowForCity(Graph<string> *currGraph, const string& cityCode, const string& graphSize, bool print);
+
+    /**
+    * @brief Prints the maximum flow for each city.
+    *
+    * This function prints the maximum flow for each city in the network,
+    * along with the total flow across all cities.
+    *
+    * @param result A vector containing pairs of cities and their corresponding maximum flows.
+    */
     static void printMaxFlow(const vector<pair<City*,double>>& result);
 
 
     //[T2.2: 1.0 point]
+
+    /**
+    * @brief Checks for water deficit in each city and prints the result.
+    *
+    * This function calculates the water deficit for each city by comparing the city's
+    * demand with the actual flow received. It then prints the deficit for each city.
+    *
+    * @param currGraph Pointer to the graph representing the water supply network.
+    * @param graphSize The size of the graph ("small" or "large").
+    */
     void checkWaterDeficit(Graph<string> *currGraph,const string& graphSize);
+
+    /**
+     * @brief Prints demand deficit information for cities.
+     *
+     * This function prints demand deficit information for cities, given a vector of pairs
+     * containing pointers to City objects and their corresponding deficit values.
+     *
+     * @param result A vector of pairs containing pointers to City objects and their deficit values.
+     *               Each pair consists of a pointer to a City object and the deficit value (demand - flow).
+     */
     static void printDeficit(const vector<pair<City*,double>>& result);
 
 
     //[T2.3: 3.0 points]
+
+    /**
+     * @brief Balances the network flow in the given graph using the Edmonds-Karp algorithm.
+     *
+     * This function balances the network flow in the given graph by adjusting the flow
+     * across edges to achieve a more uniform distribution of flow. It first calculates
+     * the maximum flow in the graph before balancing and then iteratively adjusts the
+     * flow until it reaches a more balanced state.
+     *
+     * @param currGraph A pointer to the graph to be balanced.
+     * @param graphSize The size of the graph.
+     */
     void balanceNetworkFLow(Graph<string> *currGraph, const string &graphSize);
 
-
+    /**
+     * @brief Calculates the maximum flow reaching the specified sink vertex in the graph.
+     *
+     * This function calculates the maximum flow reaching the specified sink vertex in the graph.
+     * It iterates through all incoming edges to the sink vertex and accumulates the flow on those edges.
+     *
+     * @tparam T The type of data held by the vertices in the graph.
+     * @param g A pointer to the graph in which the maximum flow is to be calculated.
+     * @param sink The identifier of the sink vertex for which the maximum flow is calculated.
+     * @return The maximum flow reaching the specified sink vertex.
+     */
     template <class T>
     double calculateMaxFlow(Graph<string>* g, const string &sink);
 
@@ -169,7 +233,7 @@ public:
 
     void printDeficit(const vector<pair<string, double>> &result);
 
-    void printBalanceFlow(double before, double before1, double after, double after1, double before2, double after2);
+    static void printBalanceFlow(double before, double before1, double after, double after1, double before2, double after2);
 };
 
 #endif //DA2324_PROJECT1_MANAGER_H

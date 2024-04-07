@@ -136,7 +136,7 @@ public:
     bool dfsIsDAG(Vertex<T> *v) const;
     std::vector<T> topsort() const;
 protected:
-    std::vector<Vertex<T> *> vertexSet;    // vertex set
+    std::vector<Vertex<T> *> vertexSet;// vertex set
 
     double ** distMatrix = nullptr;   // dist matrix for Floyd-Warshall
     int **pathMatrix = nullptr;   // path matrix for Floyd-Warshall
@@ -145,6 +145,8 @@ protected:
      * Finds the index of the vertex with a given content.
      */
     int findVertexIdx(const T &in) const;
+
+    void bfsBalanceFlow(const T &source) const;
 };
 
 void deleteMatrix(int **m, int n);
@@ -561,6 +563,7 @@ std::vector<T> Graph<T>::bfs(const T & source) const {
     }
     return res;
 }
+
 
 /****************** isDAG  ********************/
 /*

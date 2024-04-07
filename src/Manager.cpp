@@ -9,6 +9,7 @@
 #include <string>
 #include <cfloat>
 #include <set>
+#include <algorithm>
 
 using namespace std;
 
@@ -83,6 +84,7 @@ bool Manager::loadSmallStations() {
 bool Manager::loadSmallCities() {
     std::ifstream cities;
     string str;
+
     cities.open("../small_dataset/Cities_Madeira.csv");
     if (cities.is_open()) {
         getline(cities,str);
@@ -246,6 +248,7 @@ bool Manager::loadLargeCities() {
 }
 
 bool Manager::loadLargePipes() {
+
     std::ifstream pipes;
     string str;
 
@@ -313,49 +316,217 @@ void Manager::adaptLarge() {
     }
 }
 
-void Manager::printMaxFlowResults(const vector<pair<string,double>>& result) {
+void Manager::printMaxFlow(const vector<pair<City*,double>>& result) {
     std::cout << "*-------------------------------------------*" << std::endl;
-    std::cout << "*      MAX FLOW RESULTS                     *" << std::endl;
+    std::cout << "*            CITY MAX FLOW                  *" << std::endl;
     std::cout << "*-------------------------------------------*" << std::endl;
     for (const auto& pair : result) {
-        std::cout << "| CITY CODE: " << pair.first << " ----> RESULT: " << pair.second << " |" << std::endl;
+        std::cout << "City Code: " << pair.first->getCode()  << " ----> Result: " << pair.second << std::endl;
     }
-    std::cout << "*-------------------------------------------*" << std::endl;
+    double totalFLow = 0;
+    for(auto p : result){totalFLow+=p.second;}
+    std::cout << "Total Flow: " << totalFLow << std::endl;
+
+    std::cout << "*-------------------------------------------*" << std::endl<< std::endl;
 }
 
-void Manager::maxWaterFlowForCity(Graph<string> *currGraph, const string& cityCode,const string& graphSize) {
+
+
+
+vector<pair<City*,double>> Manager::maxWaterFlowForCity(Graph<string> *currGraph, const string& cityCode, const string& graphSize, bool print) {
 
     auto reservoirMap = (graphSize == "small") ? smallReservoirs : largeReservoirs;
     auto cityMap = (graphSize == "small") ? smallCities : largeCities;
-    vector<pair<string,double>> result;
+    vector<pair<City*,double>> result;
 
 
     if (currGraph->findVertex(cityCode) == nullptr && cityCode != "all") {
         cout << "ERROR: INVALID CITY";
-        return;
+        return result;
     }
     if(cityCode=="all"){
-        for(auto c : cityMap) {
-            double maxFlow = 0;
-            for (auto x: reservoirMap) {
-                edmondsKarp(currGraph, x.first, c.first);
-                maxFlow = std::max(maxFlow, calculateMaxFlow<string>(currGraph, c.first));
-            }
-            result.emplace_back(c.first, maxFlow);
+        for(const auto& c : cityMap) {
+
+            edmondsKarp(currGraph,"SuperSource","SuperTarget");
+            double maxFlow = calculateMaxFlow<string>(currGraph,c.first);
+            result.emplace_back(c.second, maxFlow);
+
         }
     }
     else {
-        double maxFlow = 0;
-        for (auto x: reservoirMap) {
-            edmondsKarp(currGraph, x.first, cityCode);
-            maxFlow = std::max(maxFlow, calculateMaxFlow<string>(currGraph, cityCode));
-        }
-        result.emplace_back(cityCode, maxFlow);
+        City* c = cityMap.at(cityCode);
+        edmondsKarp(currGraph,"SuperSource","SuperTarget");
+        double maxFlow = calculateMaxFlow<string>(currGraph,cityCode);
+
+        result.emplace_back(c, maxFlow);
     }
 
-    printMaxFlowResults(result);
+    std::sort(result.begin(), result.end(), [](const auto& a, const auto& b) {return a.first->getId() < b.first->getId();});
+    if(print)printMaxFlow(result);
+    return result;
+}
+
+double findDouble(const vector<pair<string, double>>& vec, const string& str) {
+    for (const auto &p: vec) {
+        if (p.first == str) {
+            return p.second;
+        }
+    }
+    return 0;
+}
+
+void Manager::checkWaterDeficit(Graph<string> *currGraph, const string &graphSize) {
+
+
+    edmondsKarp(currGraph,"SuperSource","SuperTarget");
+    vector<pair<City*,double>> result;
+    auto cityMap = (graphSize == "small") ? smallCities : largeCities;
+
+    for(auto city : cityMap){
+        double  currFlow =0;
+        Vertex<string>* v = currGraph->findVertex(city.first);
+        for(auto z : v->getIncoming()){currFlow+= z->getFlow();}
+        if(city.second->getDemand()>currFlow){result.emplace_back(city.second,city.second->getDemand()-currFlow);}
+    }
+
+    std::sort(result.begin(), result.end(), [](const auto& a, const auto& b) {return a.first->getId() < b.first->getId();});
+    printDeficit(result);
 
 }
+
+
+vector<pair<double,Edge<string>*>> getEdgesDiff(Graph<string> *currGraph){
+
+    vector<pair<double,Edge<string>*>> edgeVector;
+
+    for(auto v : currGraph->getVertexSet()){
+        for(auto e : v->getAdj()){
+            if(!e->isSelected()){
+                edgeVector.emplace_back((e->getWeight()-e->getFlow()),e);
+            }
+            e->setSelected(true);
+        }
+    }
+
+    for(auto v : currGraph->getVertexSet()){
+        for(auto e : v->getAdj()){
+            e->setSelected(false);
+        }
+    }
+
+    return edgeVector;
+}
+
+
+
+
+
+
+void Manager::balanceNetworkFLow(Graph<string> *currGraph, const string &graphSize) {
+
+
+    edmondsKarp(currGraph,"SuperSource","SuperTarget");
+    double maxFlowBefore = calculateMaxFlow<string >(currGraph,"SuperTarget");
+    auto edges = getEdgesDiff(currGraph);
+
+    //metrics before
+    double avgDifferenceBefore = 0;
+    double varianceBefore = 0;
+
+    for(auto e : edges){avgDifferenceBefore+= e.second->getWeight() - e.second->getFlow();}
+    avgDifferenceBefore = avgDifferenceBefore / edges.size();
+
+    for(auto e : edges){
+        varianceBefore += (e.second->getWeight() - e.second->getFlow() - avgDifferenceBefore) * (e.second->getWeight() - e.second->getFlow() - avgDifferenceBefore);
+    }
+    varianceBefore = varianceBefore / edges.size();
+
+
+
+
+    double totalFlow = 0;
+    for (auto edge : edges) {
+        totalFlow += edge.second->getFlow();
+    }
+    double averageFlow = totalFlow / edges.size();
+
+    bool balanced = false;
+    while (!balanced) {
+        balanced = true;
+        for (auto edge : edges) {
+            double flow = edge.second->getFlow();
+            double remainingCapacity = edge.second->getWeight() - flow;
+            if (flow > averageFlow && remainingCapacity > 0) {
+                auto neighbors = edge.second->getOrig()->getAdj();
+                for (auto neighbor : neighbors) {
+                    double neighborFlow = neighbor->getFlow();
+                    double neighborRemainingCapacity = neighbor->getWeight() - neighborFlow;
+                    if (neighborFlow < averageFlow && neighborRemainingCapacity > 0) {
+                        double transferFlow = min(flow - averageFlow, min(remainingCapacity, averageFlow - neighborFlow));
+                        edge.second->setFlow(flow - transferFlow);
+                        neighbor->setFlow(neighborFlow + transferFlow);
+                        balanced = false;
+                        break;
+                    }
+                }
+            }
+            if (!balanced) {
+                break;
+            }
+        }
+
+    }
+
+    //metrics after
+    double avgDifferenceAfter = 0;
+    double varianceAfter = 0;
+    double maxFlowAfter = calculateMaxFlow<string >(currGraph,"SuperTarget");
+
+    for(auto e : edges){avgDifferenceAfter += e.second->getWeight() - e.second->getFlow();}
+    avgDifferenceAfter = avgDifferenceAfter / edges.size();
+
+    for(auto e : edges){
+        varianceAfter += (e.second->getWeight() - e.second->getFlow() - avgDifferenceAfter) * (e.second->getWeight() - e.second->getFlow() - avgDifferenceAfter);
+    }
+    varianceAfter = varianceBefore / edges.size();
+
+    printBalanceFlow(avgDifferenceBefore,varianceBefore,avgDifferenceAfter,varianceAfter,maxFlowBefore,maxFlowAfter);
+
+}
+
+
+
+void Manager::printDeficit(const vector<pair<City *, double>> &result) {
+    std::cout << "*-------------------------------------------*" << std::endl;
+    std::cout << "*             DEMAND DEFICIT                *" << std::endl;
+    std::cout << "*-------------------------------------------*" << std::endl;
+    for (const auto& pair : result) {
+        std::cout << "City Code: " << pair.first->getCode() << " | Demand: " << pair.first->getDemand() << " | Flow: " << pair.first->getDemand() - pair.second << " ----> Result: " << pair.second << std::endl;
+    }
+    std::cout << "*-------------------------------------------*" <<  std::endl << std::endl;
+}
+
+void Manager::printBalanceFlow(double before, double before1, double after, double after1, double before2, double after2) {
+    std::cout << "*-------------------------------------------*" << std::endl;
+    std::cout << "*     BALANCING FLOW METRICS                *" << std::endl;
+    std::cout << "*-------------------------------------------*" << std::endl;
+
+    // Print metrics before balancing
+    std::cout << "Before Balancing:" << std::endl;
+    std::cout << "Average Difference: " << before << std::endl;
+    std::cout << "Variance: " << before1 << std::endl;
+    std::cout << "Maximum Difference: " << before2 << std::endl;
+    std::cout << std::endl;
+
+    // Print metrics after balancing
+    std::cout << "After Balancing:" << std::endl;
+    std::cout << "Average Difference: " << after << std::endl;
+    std::cout << "Variance: " << after1 << std::endl;
+    std::cout << "Maximum Flow Difference: " << after2 << std::endl;
+    std::cout << "*-------------------------------------------*" << std::endl << std::endl;
+}
+
+
 
 void Manager::removeReservoirCheckImpact(Graph<std::string> *g) {
     unordered_map<string, City *> *cities;
@@ -628,6 +799,3 @@ double Manager::calculateMaxFlow(Graph<string>* g, const string &sink) {
 
     return maxFlow;
 }
-
-
-

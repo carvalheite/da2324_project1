@@ -626,12 +626,6 @@ void Manager::removeStationCheckImpact(Graph<string> *g) {
 
     string stationCode;
 
-    if (option == 1) {
-        cout << "Which station do you want to remove?" << endl;
-        cin >> stationCode;
-        cout << endl;
-    }
-
     for (const auto& station : *stations) {
         set<City *> affectedCities;
 

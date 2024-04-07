@@ -142,13 +142,37 @@ public:
     double calculateMaxFlow(Graph<string>* g, const string &sink);
 
 
-    //[T3.1: 2.0 points] Evaluate what happens if one specific water reservoir is out of commission
+    // [T3.1: 2.0 points]
+
+    /**
+    * @brief Removes reservoirs from the network and evaluates the impact of their removal.
+    *
+    * This function compares the maximum flow in each city before and after removing the desired
+    * reservoirs and presents the differences in its value per city.
+    * @param g Pointer to the graph representing the network.
+    */
     void removeReservoirCheckImpact(Graph<string> *g);
 
-    //[T3.2: 2.0 points] Evaluate what happens when pumping stations are removed from the network
+    // [T3.2: 2.0 points]
+
+    /**
+    * @brief Removes reservoirs from the network and evaluates the impact of their removal.
+    *
+    * This function compares the maximum flow in each city before and after removing the desired pumping
+    * stations and presents the differences in its value per city.
+    * @param g Pointer to the graph representing the network.
+    */
     void removeStationCheckImpact(Graph<string> *g);
 
-    //[T3.3: 2.0 points] Evaluate what happens when pipes are removed from the network
+    // [T3.3: 2.0 points]
+
+    /**
+    * @brief Removes pipes from the network and evaluates the impact of their removal.
+    *
+    * This function compares the maximum flow in each city before and after removing the desired
+    * pipes and presents the differences in its value per city.
+    * @param g Pointer to the graph representing the network.
+    */
     void removePipeCheckImpact(Graph<string> *g);
 
     // Main function implementing the Edmonds-Karp algorithm

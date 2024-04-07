@@ -13,10 +13,10 @@ int main() {
              << "[2]  Determine Water Deficit in network" << endl
              << "[3]  Balance the load across the network" << endl
         //DONE
-             << "[4] Test Reservoir removals from the network" << endl
-             << "[5] Test Pumping Station removals from the network" << endl
-             << "[6] Test Pipe removals from the network" << endl
-             << "[0] Exit" << endl << endl;
+             << "[4]  Test Reservoir removals from the network" << endl
+             << "[5]  Test Pumping Station removals from the network" << endl
+             << "[6]  Test Pipe removals from the network" << endl
+             << "[0]  Exit" << endl << endl;
 
         int option;
         cin >> option;

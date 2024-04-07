@@ -316,9 +316,13 @@ void Manager::printMaxFlow(const vector<pair<City*,double>>& result) {
     std::cout << "*            CITY MAX FLOW                  *" << std::endl;
     std::cout << "*-------------------------------------------*" << std::endl;
     for (const auto& pair : result) {
-        std::cout << "| CITY CODE: " << pair.first->getCode()  << " ----> RESULT: " << pair.second << " |" << std::endl;
+        std::cout << "City Code: " << pair.first->getCode()  << " ----> Result: " << pair.second << std::endl;
     }
-    std::cout << "*-------------------------------------------*" << std::endl;
+    double totalFLow = 0;
+    for(auto p : result){totalFLow+=p.second;}
+    std::cout << "Total Flow: " << totalFLow << std::endl;
+
+    std::cout << "*-------------------------------------------*" << std::endl<< std::endl;
 }
 
 
@@ -409,40 +413,80 @@ vector<pair<double,Edge<string>*>> getEdgesDiff(Graph<string> *currGraph){
 }
 
 
-void printPipes(vector<pair<double, Edge<std::string> *>> pipes){
 
 
-    std::cout << "*-------------------------------------------*" << std::endl;
-    std::cout << "*                 PIPES                     *" << std::endl;
-    std::cout << "*-------------------------------------------*" << std::endl;
-    for(int i = 0;i<pipes.size();i++){
-        cout << "* PIPE CAPACITY: " << pipes[i].second->getFlow() << "/" << pipes[i].second->getWeight() << " FLOW EXCESS: " << pipes[i].first << " *\n";
-    }
 
-}
 
 void Manager::balanceNetworkFLow(Graph<string> *currGraph, const string &graphSize) {
 
+
     edmondsKarp(currGraph,"SuperSource","SuperTarget");
-    auto edgesDiff = getEdgesDiff(currGraph);
-    //std::sort(edgesDiff.begin(), edgesDiff.end(), [](const auto& a, const auto& b) {return a.second->getWeight() >  b.second->getWeight();});
+    double maxFlowBefore = calculateMaxFlow<string >(currGraph,"SuperTarget");
+    auto edges = getEdgesDiff(currGraph);
 
-    // average difference
-    double avgDiff = 0;
-    for(int i = 0;i<edgesDiff.size();i++)avgDiff += edgesDiff[i].first;
-    avgDiff = avgDiff / edgesDiff.size();
-    cout << avgDiff << endl;
+    //metrics before
+    double avgDifferenceBefore = 0;
+    double varianceBefore = 0;
 
-    //variance of diff
-    double variance = 0;
-    for(int i = 0;i<edgesDiff.size();i++)variance += (edgesDiff[i].first - avgDiff)*(edgesDiff[i].first - avgDiff);
-    variance = variance / edgesDiff.size();
-    cout << variance;
+    for(auto e : edges){avgDifferenceBefore+= e.second->getWeight() - e.second->getFlow();}
+    avgDifferenceBefore = avgDifferenceBefore / edges.size();
 
-    std::sort(edgesDiff.begin(), edgesDiff.end(), [](const auto& a, const auto& b) {return a.first >  b.first;});
+    for(auto e : edges){
+        varianceBefore += (e.second->getWeight() - e.second->getFlow() - avgDifferenceBefore) * (e.second->getWeight() - e.second->getFlow() - avgDifferenceBefore);
+    }
+    varianceBefore = varianceBefore / edges.size();
 
 
-    //printPipes(edgesDiff);
+
+
+    double totalFlow = 0;
+    for (auto edge : edges) {
+        totalFlow += edge.second->getFlow();
+    }
+    double averageFlow = totalFlow / edges.size();
+
+    bool balanced = false;
+    while (!balanced) {
+        balanced = true;
+        for (auto edge : edges) {
+            double flow = edge.second->getFlow();
+            double remainingCapacity = edge.second->getWeight() - flow;
+            if (flow > averageFlow && remainingCapacity > 0) {
+                auto neighbors = edge.second->getOrig()->getAdj();
+                for (auto neighbor : neighbors) {
+                    double neighborFlow = neighbor->getFlow();
+                    double neighborRemainingCapacity = neighbor->getWeight() - neighborFlow;
+                    if (neighborFlow < averageFlow && neighborRemainingCapacity > 0) {
+                        double transferFlow = min(flow - averageFlow, min(remainingCapacity, averageFlow - neighborFlow));
+                        edge.second->setFlow(flow - transferFlow);
+                        neighbor->setFlow(neighborFlow + transferFlow);
+                        balanced = false;
+                        break;
+                    }
+                }
+            }
+            if (!balanced) {
+                break;
+            }
+        }
+
+    }
+
+    //metrics after
+    double avgDifferenceAfter = 0;
+    double varianceAfter = 0;
+    double maxFlowAfter = calculateMaxFlow<string >(currGraph,"SuperTarget");
+
+    for(auto e : edges){avgDifferenceAfter += e.second->getWeight() - e.second->getFlow();}
+    avgDifferenceAfter = avgDifferenceAfter / edges.size();
+
+    for(auto e : edges){
+        varianceAfter += (e.second->getWeight() - e.second->getFlow() - avgDifferenceAfter) * (e.second->getWeight() - e.second->getFlow() - avgDifferenceAfter);
+    }
+    varianceAfter = varianceBefore / edges.size();
+
+    printBalanceFlow(avgDifferenceBefore,varianceBefore,avgDifferenceAfter,varianceAfter,maxFlowBefore,maxFlowAfter);
+
 }
 
 
@@ -452,10 +496,31 @@ void Manager::printDeficit(const vector<pair<City *, double>> &result) {
     std::cout << "*             DEMAND DEFICIT                *" << std::endl;
     std::cout << "*-------------------------------------------*" << std::endl;
     for (const auto& pair : result) {
-        std::cout << "| CITY CODE: " << pair.first->getCode() << " | DEMAND: " << pair.first->getDemand() << " | FLOW: " << pair.first->getDemand() - pair.second << " ----> RESULT: " << pair.second << " |" << std::endl;
+        std::cout << "City Code: " << pair.first->getCode() << " | Demand: " << pair.first->getDemand() << " | Flow: " << pair.first->getDemand() - pair.second << " ----> Result: " << pair.second << std::endl;
     }
-    std::cout << "*-------------------------------------------*" << std::endl;
+    std::cout << "*-------------------------------------------*" <<  std::endl << std::endl;
 }
+
+void Manager::printBalanceFlow(double before, double before1, double after, double after1, double before2, double after2) {
+    std::cout << "*-------------------------------------------*" << std::endl;
+    std::cout << "*     BALANCING FLOW METRICS                *" << std::endl;
+    std::cout << "*-------------------------------------------*" << std::endl;
+
+    // Print metrics before balancing
+    std::cout << "Before Balancing:" << std::endl;
+    std::cout << "Average Difference: " << before << std::endl;
+    std::cout << "Variance: " << before1 << std::endl;
+    std::cout << "Maximum Difference: " << before2 << std::endl;
+    std::cout << std::endl;
+
+    // Print metrics after balancing
+    std::cout << "After Balancing:" << std::endl;
+    std::cout << "Average Difference: " << after << std::endl;
+    std::cout << "Variance: " << after1 << std::endl;
+    std::cout << "Maximum Flow Difference: " << after2 << std::endl;
+    std::cout << "*-------------------------------------------*" << std::endl << std::endl;
+}
+
 
 
 template <class T>

@@ -55,6 +55,7 @@ public:
     //[T2.3: 3.0 points]
     void balanceNetworkFLow(Graph<string> *currGraph, const string &graphSize);
 
+
     template <class T>
     double calculateMaxFlow(Graph<string>* g, const string &sink);
 
@@ -159,6 +160,8 @@ public:
 
 
     void printDeficit(const vector<pair<string, double>> &result);
+
+    void printBalanceFlow(double before, double before1, double after, double after1, double before2, double after2);
 };
 
 #endif //DA2324_PROJECT1_MANAGER_H

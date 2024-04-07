@@ -43,15 +43,21 @@ private:
 public:
 
     //[T2.1: 4.0 points] Determine the maximum amount of water that can reach each or a specific city
-    vector<pair<string,double>> maxWaterFlowForCity(Graph<string>* currGraph,const string& cityCode,const string& graphSize, bool print);
+    vector<pair<City *, double>> maxWaterFlowForCity(Graph<string> *currGraph, const string& cityCode, const string& graphSize, bool print);
+    static void printMaxFlow(const vector<pair<City*,double>>& result);
+
 
     //[T2.2: 1.0 point]
     void checkWaterDeficit(Graph<string> *currGraph,const string& graphSize);
+    static void printDeficit(const vector<pair<City*,double>>& result);
+
+
+    //[T2.3: 3.0 points]
+    void balanceNetworkFLow(Graph<string> *currGraph, const string &graphSize);
 
     template <class T>
     double calculateMaxFlow(Graph<string>* g, const string &sink);
 
-    void printResults(const vector<pair<string,double>>& result, const string& title);
 
 
     // Main function implementing the Edmonds-Karp algorithm
@@ -152,6 +158,7 @@ public:
     }
 
 
+    void printDeficit(const vector<pair<string, double>> &result);
 };
 
 #endif //DA2324_PROJECT1_MANAGER_H

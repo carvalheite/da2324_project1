@@ -109,6 +109,24 @@ public:
      */
     void balanceNetworkFLow(Graph<string> *currGraph, const string &graphSize);
 
+
+    /**
+     * @brief Prints the metrics related to balancing flow in the network.
+     *
+     * This function prints the metrics related to balancing flow in the network,
+     * including average difference, variance, and maximum flow difference, before
+     * and after the balancing process.
+     *
+     * @param before The average difference before balancing.
+     * @param before1 The variance before balancing.
+     * @param after The average difference after balancing.
+     * @param after1 The variance after balancing.
+     * @param before2 The maximum difference before balancing.
+     * @param after2 The maximum flow difference after balancing.
+     */
+    static void printBalanceFlow(double before, double before1, double after, double after1, double before2, double after2);
+
+
     /**
      * @brief Calculates the maximum flow reaching the specified sink vertex in the graph.
      *
@@ -231,9 +249,6 @@ public:
     }
 
 
-    void printDeficit(const vector<pair<string, double>> &result);
-
-    static void printBalanceFlow(double before, double before1, double after, double after1, double before2, double after2);
 };
 
 #endif //DA2324_PROJECT1_MANAGER_H

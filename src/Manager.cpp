@@ -537,7 +537,7 @@ void Manager::removePipeCheckImpact(Graph<string> *g) {
         cin >> orig;
         if (orig == "Q" or orig == "q") break;
         cin >> dest;
-        if (dest == "Q" or orig == "q") break;
+        if (dest == "Q" or dest == "q") break;
 
         if (g->findVertex(orig) == nullptr) {
             cout << "Invalid origin station. Please try again." << endl;
@@ -551,12 +551,26 @@ void Manager::removePipeCheckImpact(Graph<string> *g) {
         Vertex<string>* origin = g->findVertex(orig);
         Vertex<string>* destination = g->findVertex(dest);
 
-        for (auto edge: origin->getAdj()) {
+        for (auto &edge: origin->getAdj()) {
             if (edge->getDest() == destination) {
                 removedPipes.insert(edge);
                 break;
             }
         }
+        for (auto &edge: destination->getAdj()) {
+            if (edge->getDest() == origin) {
+                removedPipes.insert(edge);
+                break;
+            }
+        }
+
+
+    }
+
+    cout << endl << "The following pipes will be removed: " << endl;
+
+    for (auto pipe: removedPipes) {
+        cout << pipe->getOrig()->getInfo() << " -> " << pipe->getDest()->getInfo() << endl;
     }
 
     set<City *> affectedCities;
@@ -570,7 +584,7 @@ void Manager::removePipeCheckImpact(Graph<string> *g) {
     }
 
     unordered_map<Edge<string>*, double> originalPipeCapacity;
-    for (auto pipe: removedPipes) {
+    for (auto &pipe: removedPipes) {
         originalPipeCapacity[pipe] = pipe->getWeight();
         pipe->setWeight(0);
     }
@@ -583,6 +597,7 @@ void Manager::removePipeCheckImpact(Graph<string> *g) {
         }
     }
 
+    cout << endl;
     if (affectedCities.empty()) cout << "No cities were affected by the removal of the pipe(s).";
     else {
         cout << "Cities affected by the removal of the pipe(s):" << endl;

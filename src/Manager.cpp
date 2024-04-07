@@ -515,7 +515,7 @@ void Manager::printBalanceFlow(double before, double before1, double after, doub
     std::cout << "Before Balancing:" << std::endl;
     std::cout << "Average Difference: " << before << std::endl;
     std::cout << "Variance: " << before1 << std::endl;
-    std::cout << "Maximum Difference: " << before2 << std::endl;
+    std::cout << "Maximum Flow Difference: " << before2 << std::endl;
     std::cout << std::endl;
 
     // Print metrics after balancing

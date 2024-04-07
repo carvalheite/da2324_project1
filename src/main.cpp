@@ -9,9 +9,9 @@ int main() {
     while (true) {
         //TODO
         cout << endl
-             << "[1] T2.1" << endl
-             << "[2] T2.2" << endl
-             << "[3] T2.3" << endl
+             << "[1]  Determine the maximum amount of water that can reach each or a specific city" << endl
+             << "[2]  Determine Water Deficit in network" << endl
+             << "[3]  Balance the load across the network" << endl
         //DONE
              << "[4] Test Reservoir removals from the network" << endl
              << "[5] Test Pumping Station removals from the network" << endl
@@ -22,6 +22,69 @@ int main() {
         cin >> option;
 
         switch (option) {
+
+
+            case 1:
+                while (true){
+                    cout << "Do you wish to manage the [S]mall or [L]arge network?" << endl;
+                    char network;
+                    cin >> network;
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                    cout << "Choose the desired City_Code: (If you wish to display all, write 'all')" << endl;
+                    string cityCode;
+                    getline(cin, cityCode);
+
+                    if (network == 'S' or network == 's') {
+                        manager.maxWaterFlowForCity(&manager.smallGraph, cityCode, "small", true);
+                        break;
+                    } else if (network == 'L' or network == 'l') {
+                        manager.maxWaterFlowForCity(&manager.largeGraph, cityCode, "large", true);
+                        break;
+                    } else {
+                        cout << "Invalid option" << endl;
+                        continue;
+                    }
+                }
+                break;
+            case 2:
+                while (true){
+                    cout << "Do you wish to manage the [S]mall or [L]arge network?" << endl;
+                    char network;
+                    cin >> network;
+                    cout << endl;
+
+                    if (network == 'S' or network == 's') {
+                        manager.checkWaterDeficit(&manager.smallGraph,"small");
+                        break;
+                    } else if (network == 'L' or network == 'l') {
+                        manager.checkWaterDeficit(&manager.largeGraph,"large");
+                        break;
+                    } else {
+                        cout << "Invalid option" << endl;
+                        continue;
+                    }
+                }
+                break;
+            case 3:
+                while (true){
+                    cout << "Do you wish to manage the [S]mall or [L]arge network?" << endl;
+                    char network;
+                    cin >> network;
+                    cout << endl;
+
+                    if (network == 'S' or network == 's') {
+                        manager.balanceNetworkFLow(&manager.smallGraph,"small");
+                        break;
+                    } else if (network == 'L' or network == 'l') {
+                        manager.balanceNetworkFLow(&manager.largeGraph,"large");
+                        break;
+                    } else {
+                        cout << "Invalid option" << endl;
+                        continue;
+                    }
+                }
+                break;
             case 4:
                 while (true) {
                     cout << "Do you wish to manage the [S]mall or [L]arge network?" << endl;

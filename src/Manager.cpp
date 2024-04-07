@@ -376,6 +376,10 @@ void Manager::removeReservoirCheckImpact(Graph<std::string> *g) {
         string reservoirCode;
         cout << "Which reservoir do you want to remove?" << endl;
         cin >> reservoirCode;
+        while (g->findVertex(reservoirCode) == nullptr) {
+            cout << "Invalid reservoir code. Please try again." << endl;
+            cin >> reservoirCode;
+        }
         cout << endl;
 
         unordered_map<string, double> maxFlowCity;

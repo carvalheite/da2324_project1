@@ -4,68 +4,81 @@
 int main() {
     Manager manager = Manager();
 
-    /*cout << "Large Graph Elements:" << endl;
-    for (auto &i : manager.largeGraph.getVertexSet()) {
-        cout << i->getInfo() << endl;
-    }
+    cout << "Welcome to the Water Network Manager" << endl << "What would you like to do?" << endl;
 
-    cout << "Small Graph Elements:" << endl;
-    for (auto &i : manager.smallGraph.getVertexSet()) {
-        cout << i->getInfo() << endl;
-    }
+    while (true) {
+        //TODO
+        cout << endl
+             << "[1] T2.1" << endl
+             << "[2] T2.2" << endl
+             << "[3] T2.3" << endl
+        //DONE
+             << "[4] Test Reservoir removals from the network" << endl
+             << "[5] Test Pumping Station removals from the network" << endl
+             << "[6] Test Pipe removals from the network" << endl
+             << "[0] Exit" << endl << endl;
 
-    cout << "Large Graph Pipes:" << endl;
-    for (auto &i : manager.largeGraph.getVertexSet()) {
-        cout << "All incoming edges to " << i->getInfo() << endl;
-        for (auto &edge : i->getIncoming()) {
-            cout << edge->getOrig()->getInfo() << " | Capacity: " << edge->getWeight() << endl;
+        int option;
+        cin >> option;
+
+        switch (option) {
+            case 4:
+                while (true) {
+                    cout << "Do you wish to manage the [S]mall or [L]arge network?" << endl;
+                    char network;
+                    cin >> network;
+                    if (network == 'S' or network == 's') {
+                        manager.removeReservoirCheckImpact(&manager.smallGraph);
+                        break;
+                    } else if (network == 'L' or network == 'l') {
+                        manager.removeReservoirCheckImpact(&manager.largeGraph);
+                        break;
+                    } else {
+                        cout << "Invalid option" << endl;
+                        continue;
+                    }
+                }
+                break;
+            case 5:
+                while (true) {
+                    cout << "Do you wish to manage the [S]mall or [L]arge network?" << endl;
+                    char network;
+                    cin >> network;
+                    if (network == 'S' or network == 's') {
+                        manager.removeStationCheckImpact(&manager.smallGraph);
+                        break;
+                    } else if (network == 'L' or network == 'l') {
+                        manager.removeStationCheckImpact(&manager.largeGraph);
+                        break;
+                    } else {
+                        cout << "Invalid option" << endl;
+                        continue;
+                    }
+                }
+                break;
+            case 6:
+                while (true) {
+                    cout << "Do you wish to manage the [S]mall or [L]arge network?" << endl;
+                    char network;
+                    cin >> network;
+                    if (network == 'S' or network == 's') {
+                        manager.removePipeCheckImpact(&manager.smallGraph);
+                        break;
+                    } else if (network == 'L' or network == 'l') {
+                        manager.removePipeCheckImpact(&manager.largeGraph);
+                        break;
+                    } else {
+                        cout << "Invalid option" << endl;
+                        continue;
+                    }
+                }
+                break;
+            case 0:
+                return 0;
+            default:
+                cout << "Invalid option" << endl;
+                continue;
         }
     }
-
-    cout << "Small Graph Pipes:" << endl;
-    for (auto &i : manager.smallGraph.getVertexSet()) {
-        cout << "All incoming edges to " << i->getInfo() << endl;
-        for (auto &edge : i->getIncoming()) {
-            cout << edge->getOrig()->getInfo() << " | Capacity: " << edge->getWeight() << endl;
-        }
-    }*/
-
-    /*cout << "Small Graph SuperSource:" << endl;
-
-    auto smallSuperSource = manager.smallGraph.findVertex("SuperSource");
-    for (auto edge : smallSuperSource->getAdj()) {
-        cout << edge->getOrig()->getInfo() << " to " << edge->getDest()->getInfo() << endl;
-    }
-
-    cout << "Small Graph SuperTarget:" << endl;
-
-    auto smallSuperTarget = manager.smallGraph.findVertex("SuperTarget");
-    for (auto edge : smallSuperTarget->getIncoming()) {
-        cout << edge->getOrig()->getInfo() << " to " << edge->getDest()->getInfo() << endl;
-    }
-
-    cout << "Large Graph SuperSource:" << endl;
-
-    auto largeSuperSource = manager.largeGraph.findVertex("SuperSource");
-    for (auto edge : largeSuperSource->getAdj()) {
-        cout << edge->getOrig()->getInfo() << " to " << edge->getDest()->getInfo() << endl;
-    }
-
-    cout << "Small Graph SuperTarget:" << endl;
-
-    auto largeSuperTarget = manager.largeGraph.findVertex("SuperTarget");
-    for (auto edge : largeSuperTarget->getIncoming()) {
-        cout << edge->getOrig()->getInfo() << " to " << edge->getDest()->getInfo() << endl;
-    }*/
-
-    /*Graph<string> *small = &manager.smallGraph;
-    Graph<string> *large = &manager.largeGraph;
-
-    cout << "Number of elements (small):" << endl << small->getVertexSet().size() << endl;
-    cout << "Number of elements (large):" << endl << large->getVertexSet().size() << endl;*/
-   // manager.maxWaterFlowForCity(small,"all","small");
-
-    manager.removePipeCheckImpact(&manager.largeGraph);
-
     return 0;
 }
